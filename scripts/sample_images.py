@@ -6,7 +6,8 @@ from ddpm import script_utils
 
 
 def main():
-    args = create_argparser().parse_args()
+    args = create_argparser()
+    print(args)
     device = args.device
 
     try:
@@ -31,16 +32,21 @@ def main():
         print("Keyboard interrupt, generation finished early")
 
 
-def create_argparser():
+def create_argparser() -> argparse.Namespace:
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    defaults = dict(num_images=10000, device=device)
+    defaults = dict(
+        num_images=10,
+        device=device,
+        schedule_low=1e-4,
+        schedule_high=0.02,
+    )
     defaults.update(script_utils.diffusion_defaults())
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str)
     parser.add_argument("--save_dir", type=str)
     script_utils.add_dict_to_argparser(parser, defaults)
-    return parser
+    return parser.parse_args()
 
 
 if __name__ == "__main__":

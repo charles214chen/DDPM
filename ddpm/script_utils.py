@@ -2,8 +2,8 @@ import argparse
 import torchvision
 import torch.nn.functional as F
 
-from .unet import UNet
-from .diffusion import (
+from ddpm.unet import UNet
+from ddpm.diffusion import (
     GaussianDiffusion,
     generate_linear_schedule,
     generate_cosine_schedule,
@@ -120,3 +120,13 @@ def get_diffusion_from_args(args):
     )
 
     return diffusion
+
+
+if __name__ == '__main__':
+    betas = generate_cosine_schedule(10)
+    betas = generate_linear_schedule(
+        1000,
+        0 * 1000 / 1000,
+        1 * 1000 / 1000,
+    )
+    print(betas)

@@ -9,12 +9,14 @@ from ddpm import script_utils
 
 
 def main():
-    args = create_argparser().parse_args()
+    args = create_argparser()
+    print(args)
     device = args.device
 
     try:
         diffusion = script_utils.get_diffusion_from_args(args).to(device)
         optimizer = torch.optim.Adam(diffusion.parameters(), lr=args.learning_rate)
+        torch.compile(diffusion)  # may help.
 
         if args.model_checkpoint is not None:
             diffusion.load_state_dict(torch.load(args.model_checkpoint))
@@ -54,13 +56,14 @@ def main():
             batch_size=batch_size,
             shuffle=True,
             drop_last=True,
-            num_workers=2,
+            num_workers=0,
         ))
-        test_loader = DataLoader(test_dataset, batch_size=batch_size, drop_last=True, num_workers=2)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, drop_last=True, num_workers=0)
         
         acc_train_loss = 0
 
         for iteration in range(1, args.iterations + 1):
+            print(f"=====> iter: {iteration}")
             diffusion.train()
 
             x, y = next(train_loader)
@@ -104,12 +107,12 @@ def main():
 
                 test_loss /= len(test_loader)
                 acc_train_loss /= args.log_rate
-
-                wandb.log({
-                    "test_loss": test_loss,
-                    "train_loss": acc_train_loss,
-                    "samples": [wandb.Image(sample) for sample in samples],
-                })
+                if args.log_to_wandb:
+                    wandb.log({
+                        "test_loss": test_loss,
+                        "train_loss": acc_train_loss,
+                        "samples": [wandb.Image(sample) for sample in samples],
+                    })
 
                 acc_train_loss = 0
             
@@ -128,7 +131,7 @@ def main():
         print("Keyboard interrupt, run finished early")
 
 
-def create_argparser():
+def create_argparser() -> argparse.Namespace:
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     run_name = datetime.datetime.now().strftime("ddpm-%Y-%m-%d-%H-%M")
     defaults = dict(
@@ -136,10 +139,10 @@ def create_argparser():
         batch_size=128,
         iterations=800000,
 
-        log_to_wandb=True,
+        log_to_wandb=False,
         log_rate=1000,
         checkpoint_rate=1000,
-        log_dir="~/ddpm_logs",
+        log_dir="./checkpoints",
         project_name=None,
         run_name=run_name,
 
@@ -155,7 +158,7 @@ def create_argparser():
 
     parser = argparse.ArgumentParser()
     script_utils.add_dict_to_argparser(parser, defaults)
-    return parser
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
