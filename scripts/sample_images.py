@@ -5,9 +5,7 @@ import torchvision
 from ddpm import script_utils
 
 
-def main():
-    args = create_argparser()
-    print(args)
+def main(args):
     device = args.device
 
     try:
@@ -28,6 +26,7 @@ def main():
             for image_id in range(len(samples)):
                 image = ((samples[image_id] + 1) / 2).clip(0, 1)
                 torchvision.utils.save_image(image, f"{args.save_dir}/{image_id}.png")
+
     except KeyboardInterrupt:
         print("Keyboard interrupt, generation finished early")
 
@@ -45,9 +44,12 @@ def create_argparser() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str)
     parser.add_argument("--save_dir", type=str)
+    parser.add_argument("--vis_process", "-v", action="store_true", default=False)
     script_utils.add_dict_to_argparser(parser, defaults)
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    main()
+    args = create_argparser()
+    print(args)
+    # main(args)

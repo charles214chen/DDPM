@@ -79,16 +79,21 @@ def diffusion_defaults():
     return defaults
 
 
-def get_diffusion_from_args(args):
+def get_diffusion_from_args(args, **kwargs):
     activations = {
         "relu": F.relu,
         "mish": F.mish,
         "silu": F.silu,
     }
+    img_channels = kwargs.pop("img_channels", 3)
+    img_size = kwargs.pop("img_size", (32, 32))
+    num_classes = kwargs.pop("num_classes", 10)
+    num_groups = kwargs.pop("num_groups", 32)
+    if kwargs:
+        raise ValueError(f"Unexpected arg: {kwargs}")
 
     model = UNet(
-        img_channels=3,
-
+        img_channels=img_channels,
         base_channels=args.base_channels,
         channel_mults=args.channel_mults,
         time_emb_dim=args.time_emb_dim,
@@ -96,9 +101,9 @@ def get_diffusion_from_args(args):
         dropout=args.dropout,
         activation=activations[args.activation],
         attention_resolutions=args.attention_resolutions,
-
         num_classes=None if not args.use_labels else 10,
         initial_pad=0,
+        num_groups=num_groups
     )
 
     if args.schedule == "cosine":
@@ -111,7 +116,10 @@ def get_diffusion_from_args(args):
         )
 
     diffusion = GaussianDiffusion(
-        model, (32, 32), 3, 10,
+        model,
+        img_size,
+        img_channels,
+        num_classes,
         betas,
         ema_decay=args.ema_decay,
         ema_update_rate=args.ema_update_rate,
