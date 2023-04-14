@@ -1,5 +1,4 @@
 import argparse
-import torchvision
 import torch.nn.functional as F
 
 from ddpm.unet import UNet
@@ -17,16 +16,6 @@ def cycle(dl):
     while True:
         for data in dl:
             yield data
-
-def get_transform():
-    class RescaleChannels(object):
-        def __call__(self, sample):
-            return 2 * sample - 1
-
-    return torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor(),
-        RescaleChannels(),
-    ])
 
 
 def str2bool(v):

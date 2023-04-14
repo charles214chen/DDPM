@@ -5,6 +5,8 @@ import wandb
 
 from torch.utils.data import DataLoader
 from torchvision import datasets
+
+from datasets.utils import get_transform
 from ddpm import script_utils
 
 
@@ -37,18 +39,19 @@ def main():
 
         batch_size = args.batch_size
 
+        transform_op = get_transform()
         train_dataset = datasets.CIFAR10(
             root='./cifar_train',
             train=True,
             download=True,
-            transform=script_utils.get_transform(),
+            transform=transform_op
         )
 
         test_dataset = datasets.CIFAR10(
             root='./cifar_test',
             train=False,
             download=True,
-            transform=script_utils.get_transform(),
+            transform=transform_op,
         )
 
         train_loader = script_utils.cycle(DataLoader(

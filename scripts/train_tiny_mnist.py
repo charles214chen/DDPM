@@ -31,7 +31,7 @@ def main(args):
                                                          num_classes=num_labels,
                                                          num_groups=2).to(device)
         optimizer = torch.optim.Adam(diffusion.parameters(), lr=args.learning_rate)
-        torch.compile(diffusion)  # may help.
+        # torch.compile(diffusion)  # may help. windows not support.
 
         if args.model_checkpoint is not None:
             diffusion.load_state_dict(torch.load(args.model_checkpoint))
