@@ -9,27 +9,21 @@ Even with cpu couple of hours should be enough.
 
 Authors: ChenChao (chenchao214@outlook.com)
 """
-import argparse
-import datetime
 import torch
 import wandb
 
 from torch.utils.data import DataLoader
 from ddpm import script_utils
 from datasets.tiny_mnist import MnistDataset
+from ddpm.script_utils import get_args
 from tools import file_utils
 
 
 def main(args):
     device = args.device
     file_utils.mkdir(args.log_dir)
-    num_labels = 2
     try:
-        diffusion = script_utils.get_diffusion_from_args(args,
-                                                         img_channels=1,
-                                                         img_size=(28, 28),
-                                                         num_classes=num_labels,
-                                                         num_groups=2).to(device)
+        diffusion = script_utils.get_diffusion_from_args(args).to(device)
         optimizer = torch.optim.Adam(diffusion.parameters(), lr=args.learning_rate)
         # torch.compile(diffusion)  # may help. windows not support.
 
@@ -52,7 +46,7 @@ def main(args):
 
         batch_size = args.batch_size
 
-        target_labels = list(range(num_labels))
+        target_labels = list(range(args.num_classes))
         train_dataset = MnistDataset(is_train=True, target_labels=target_labels)
 
         test_dataset = MnistDataset(is_train=False, target_labels=target_labels)
@@ -75,10 +69,7 @@ def main(args):
             x = x.to(device)
             y = y.to(device)
 
-            if args.use_labels:
-                loss = diffusion(x, y)
-            else:
-                loss = diffusion(x)
+            loss = diffusion(x, y)
 
             print(f"=====> iter: {iteration}, loss: {round(loss.item(), 6)}")
 
@@ -97,21 +88,11 @@ def main(args):
                     for x, y in test_loader:
                         x = x.to(device)
                         y = y.to(device)
-
-                        if args.use_labels:
-                            loss = diffusion(x, y)
-                        else:
-                            loss = diffusion(x)
-
+                        loss = diffusion(x, y)
                         test_loss += loss.item()
 
-                if args.use_labels:
-                    samples = diffusion.sample(num_labels, device, y=torch.arange(2, device=device))
-                else:
-                    samples = diffusion.sample(num_labels, device)
-
+                samples = diffusion.sample(args.num_classes, device, y=torch.arange(args.num_classes, device=device))
                 samples = ((samples + 1) / 2).clip(0, 1).permute(0, 2, 3, 1).numpy()
-
                 test_loss /= len(test_loader)
                 acc_train_loss /= args.log_rate
                 if args.log_to_wandb:
@@ -140,56 +121,8 @@ def main(args):
             wandb_runner.finish()
 
 
-def create_argparser() -> argparse.Namespace:
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    time_frame = datetime.datetime.now().strftime("ddpm-%Y-%m-%d-%H-%M")
-    run_name = f"tiny_mnist_{time_frame}"
-    defaults = dict(
-        learning_rate=2e-4,
-        batch_size=128,
-        iterations=800000,
-        log_to_wandb=False,
-        log_rate=200,
-        checkpoint_rate=800,
-        log_dir="./checkpoints/nano2",
-        project_name="aigc-ddpm",
-        run_name=run_name,
-        model_checkpoint=None,
-        optim_checkpoint=None,
-        schedule_low=1e-4,
-        schedule_high=0.02,
-        device=device,
-    )
-    defaults.update(nano_diffusion_defaults())
-
-    parser = argparse.ArgumentParser()
-    script_utils.add_dict_to_argparser(parser, defaults)
-    return parser.parse_args()
-
-
-def nano_diffusion_defaults():
-    defaults = dict(
-        num_timesteps=1000,
-        schedule="linear",
-        loss_type="l2",
-        use_labels=True,
-        base_channels=4,
-        channel_mults=(1, 2),
-        num_res_blocks=1,
-        time_emb_dim=8,
-        norm="gn",
-        dropout=0.1,
-        activation="silu",
-        attention_resolutions=(1,),
-        ema_decay=0.999,
-        ema_update_rate=1,
-    )
-
-    return defaults
-
-
 if __name__ == "__main__":
-    args = create_argparser()
+    args = get_args()
     for k, v in args.__dict__.items():
         print(f"===> {k} : {v}")
     main(args)

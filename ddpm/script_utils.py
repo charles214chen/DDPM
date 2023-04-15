@@ -1,4 +1,7 @@
 import argparse
+import datetime
+
+import torch
 import torch.nn.functional as F
 
 from ddpm.unet import UNet
@@ -68,21 +71,15 @@ def diffusion_defaults():
     return defaults
 
 
-def get_diffusion_from_args(args, **kwargs):
+def get_diffusion_from_args(args):
     activations = {
         "relu": F.relu,
         "mish": F.mish,
         "silu": F.silu,
     }
-    img_channels = kwargs.pop("img_channels", 3)
-    img_size = kwargs.pop("img_size", (32, 32))
-    num_classes = kwargs.pop("num_classes", 10)
-    num_groups = kwargs.pop("num_groups", 32)
-    if kwargs:
-        raise ValueError(f"Unexpected arg: {kwargs}")
 
     model = UNet(
-        img_channels=img_channels,
+        img_channels=args.img_channels,
         base_channels=args.base_channels,
         channel_mults=args.channel_mults,
         time_emb_dim=args.time_emb_dim,
@@ -90,9 +87,9 @@ def get_diffusion_from_args(args, **kwargs):
         dropout=args.dropout,
         activation=activations[args.activation],
         attention_resolutions=args.attention_resolutions,
-        num_classes=None if not args.use_labels else 10,
+        num_classes=args.num_classes,
         initial_pad=0,
-        num_groups=num_groups
+        num_groups=args.num_groups
     )
 
     if args.schedule == "cosine":
@@ -106,9 +103,9 @@ def get_diffusion_from_args(args, **kwargs):
 
     diffusion = GaussianDiffusion(
         model,
-        img_size,
-        img_channels,
-        num_classes,
+        args.img_size,
+        args.img_channels,
+        args.num_classes,
         betas,
         ema_decay=args.ema_decay,
         ema_update_rate=args.ema_update_rate,
@@ -117,6 +114,53 @@ def get_diffusion_from_args(args, **kwargs):
     )
 
     return diffusion
+
+
+def get_args() -> argparse.Namespace:
+    """
+    Get args for all (u-net and diffusion training super-params.)
+    Default for training tiny model with mnist dataset. You can also pass args to override.
+    """
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    time_frame = datetime.datetime.now().strftime("ddpm-%Y-%m-%d-%H-%M")
+    run_name = f"tiny_mnist_{time_frame}"
+    defaults = dict(
+        img_channels=1,
+        img_size=(28, 28),
+        num_classes=2,
+        num_groups=2,
+        learning_rate=2e-4,
+        batch_size=128,
+        iterations=800000,
+        log_to_wandb=False,
+        log_rate=500,
+        checkpoint_rate=1000,
+        log_dir="./checkpoints/nano2",
+        project_name="aigc-ddpm",
+        run_name=run_name,
+        model_checkpoint=None,
+        optim_checkpoint=None,
+        schedule_low=1e-4,
+        schedule_high=0.02,
+        device=device,
+        num_timesteps=1000,
+        schedule="linear",
+        loss_type="l2",
+        base_channels=4,
+        channel_mults=(1, 2),
+        num_res_blocks=1,
+        time_emb_dim=8,
+        norm="gn",
+        dropout=0.1,
+        activation="silu",
+        attention_resolutions=(1,),
+        ema_decay=0.999,
+        ema_update_rate=1,
+    )
+
+    parser = argparse.ArgumentParser()
+    add_dict_to_argparser(parser, defaults)  # args could be override by user
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
