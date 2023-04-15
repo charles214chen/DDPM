@@ -116,7 +116,7 @@ def get_diffusion_from_args(args):
     return diffusion
 
 
-def get_args() -> argparse.Namespace:
+def get_args(parser: argparse.ArgumentParser = None) -> argparse.Namespace:
     """
     Get args for all (u-net and diffusion training super-params.)
     Default for training tiny model with mnist dataset. You can also pass args to override.
@@ -158,7 +158,7 @@ def get_args() -> argparse.Namespace:
         ema_update_rate=1,
     )
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser() if parser is None else parser
     add_dict_to_argparser(parser, defaults)  # args could be override by user
     return parser.parse_args()
 

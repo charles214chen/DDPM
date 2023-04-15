@@ -119,8 +119,6 @@ class GaussianDiffusion(nn.Module):
             raise ValueError("sample batch size different from length of given y")
 
         x = torch.randn(batch_size, self.img_channels, *self.img_size, device=device)
-        diffusion_sequence = [x.cpu().detach()]
-        
         for t in range(self.num_timesteps - 1, -1, -1):
             t_batch = torch.tensor([t], device=device).repeat(batch_size)
             x = self.remove_noise(x, t_batch, y, use_ema)
@@ -128,9 +126,7 @@ class GaussianDiffusion(nn.Module):
             if t > 0:
                 x += extract(self.sigma, t_batch, x.shape) * torch.randn_like(x)
             
-            diffusion_sequence.append(x.cpu().detach())
-        
-        return diffusion_sequence
+            yield x.cpu().detach()
 
     def perturb_x(self, x, t, noise):
         return (
