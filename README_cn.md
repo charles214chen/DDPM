@@ -7,3 +7,21 @@
     1. 重构以提升可读性与可扩展性
     2. 去除多余代码，尽量做到"极小"的代码量，而不失算法原理重要步骤
     3. 提供训练脚本让大家能在消费级GPU或者CPU完成训练；并可视化成果
+
+## 开始
+
+- Train
+```shell
+python script/train_tiny_mnist.py
+```
+
+- Eval
+```shell
+python script/sample_images.py --model_path "your model file path" -v
+```
+
+- Visualize 
+  - here are the sampling process with model training after 2400 iterations.
+  - More iterations should be better. Strongly recommend you try it.
+
+  ![gif](resources/model_2400_iters_label_1.gif)
