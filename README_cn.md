@@ -25,3 +25,7 @@ python script/sample_images.py --model_path "your model file path" -v
   - More iterations should be better. Strongly recommend you try it.
 
   ![gif](resources/model_2400_iters_label_1.gif)
+
+  <p align="center">
+    <img src="resources/model_2400_iters_label_1.gif" />
+  </p>
