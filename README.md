@@ -1,50 +1,31 @@
 ## Denoising Diffusion Probabilistic Models
 
-An implementation of Denoising Diffusion Probabilistic Models for image generation written in PyTorch. This roughly follows the original code by Ho et al. Unlike their implementation, however, my model allows for class conditioning through bias in residual blocks. 
+## 目的
+- Fork自[DDPM](https://github.com/abarankab/DDPM), 用以学习与实践，若你刚接触diffusion并打算开始实践，从这开始是一个好的选择
 
-## Experiments
+- 鉴于此目的，计划对原库的改造将从以下几个方面进行:
+    1. 重构以提升可读性与可扩展性
+    2. 去除多余代码，尽量做到"极小"的代码量，而不失算法原理重要步骤
+    3. 提供训练脚本让大家能在消费级GPU或者CPU完成训练；并可视化成果
 
-I have trained the model on MNIST and CIFAR-10 datasets. The model seemed to converge well on the MNIST dataset, producing realistic samples. However, I am yet to report the same CIFAR-10 quality that Ho. et al. provide in their paper. Here are the samples generated with a linear schedule after 2000 epochs:
+## 开始
 
-![Samples after 2000 epochs](resources/samples_linear_200.png)
-
-Here is a sample of a diffusion sequence on MNIST:
-
-<p align="center">
-  <img src="resources/diffusion_sequence_mnist.gif" />
-</p>
-
-
-## Resources
-
-I gave a talk about diffusion models, NCSNs, and their applications in audio generation. The [slides are available here](resources/diffusion_models_talk_slides.pdf).
-
-I also compiled a report with what are, in my opinion, the most crucial findings on the topic of denoising diffusion models. It is also [available in this repository](resources/diffusion_models_report.pdf).
-
-
-## Acknowledgements
-
-I used [Phil Wang's implementation](https://github.com/lucidrains/denoising-diffusion-pytorch) and [the official Tensorflow repo](https://github.com/hojonathanho/diffusion) as a reference for my work.
-
-## Citations
-
-```bibtex
-@misc{ho2020denoising,
-    title   = {Denoising Diffusion Probabilistic Models},
-    author  = {Jonathan Ho and Ajay Jain and Pieter Abbeel},
-    year    = {2020},
-    eprint  = {2006.11239},
-    archivePrefix = {arXiv},
-    primaryClass = {cs.LG}
-}
+- Train
+```shell
+python script/train_tiny_mnist.py
 ```
 
-```bibtex
-@inproceedings{anonymous2021improved,
-    title   = {Improved Denoising Diffusion Probabilistic Models},
-    author  = {Anonymous},
-    booktitle = {Submitted to International Conference on Learning Representations},
-    year    = {2021},
-    url     = {https://openreview.net/forum?id=-NEXDKk8gZ},
-    note    = {under review}
-}
+- Eval
+```shell
+python script/sample_images.py --model_path "your model file path" -v
+```
+
+- Visualize 
+  - here are the sampling process with model training after 2400 iterations.
+  - More iterations should be better. Strongly recommend you try it.
+
+  ![gif](resources/model_2400_iters_label_1.gif)
+
+  <p align="center">
+    <img src="resources/model_2400_iters_label_1.gif" width="300%" height="300%" />
+  </p>
