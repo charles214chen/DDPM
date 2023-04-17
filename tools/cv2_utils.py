@@ -14,6 +14,8 @@ import cv2
 import numpy as np
 from collections import namedtuple
 
+import imageio
+
 VideoMeta = namedtuple("VideoMeta", ["fps", "frame_num", "w", "h"])
 
 
@@ -88,6 +90,11 @@ def images_to_video(img_bgr_iterable, to_video_file, fps: int = 25):
         if capture is not None:
             capture.release()
             print(f"==> video saved in {to_video_file}")
+
+
+def images_to_gif(img_bgr_iterable, to_gif_file: str, fps: int = 25):
+    duration = 1. / fps
+    imageio.mimsave(to_gif_file, img_bgr_iterable, format="GIF", duration=duration)
 
 
 def img_show(img: np.ndarray, win_name="show it!"):

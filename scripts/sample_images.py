@@ -32,9 +32,9 @@ def main(args: argparse.Namespace):
     if vis_process:
         for label in range(num_classes):
             y = torch.ones(num_each_label, dtype=torch.long, device=device) * label
-            gen = diffusion.sample_diffusion_sequence(num_each_label, device, y)
 
             def generate_images() -> "yield image numpy array":
+                gen = diffusion.sample_diffusion_sequence(num_each_label, device, y)
                 for idx, image_tensor in tqdm.tqdm(enumerate(gen), desc=f"Generating for label {label}..", total=args.num_timesteps):
                     if idx % 5 != 0:  # 1000 / 5 = 200 frames
                         continue
@@ -45,6 +45,9 @@ def main(args: argparse.Namespace):
 
             to_video = os.path.join(save_dir, f"{label}.mp4")
             cv2_utils.images_to_video(generate_images(), to_video)
+
+            to_gif = os.path.join(save_dir, f"{label}.gif")
+            cv2_utils.images_to_gif(list(generate_images()), to_gif)
     else:
         for label in range(num_classes):
             y = torch.ones(num_each_label, dtype=torch.long, device=device) * label
