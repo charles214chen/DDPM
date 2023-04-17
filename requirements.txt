@@ -1,0 +1,7 @@
+imageio==2.26.0
+numpy==1.24.2
+opencv_python==4.7.0.72
+setuptools==65.6.3
+torch==2.0.0
+torchvision==0.15.1
+tqdm==4.65.0
