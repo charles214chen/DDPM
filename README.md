@@ -19,12 +19,12 @@ diffusion模型原理学习 & 实践 & 玩具库
 
 - Train : 极小模型生成手写数字0和1（带条件）；数据集会自动下载，模型文件将存放于scripts/checkpoints/
 ```shell
-python script/train_tiny_mnist.py
+python scripts/train_tiny_mnist.py
 ```
 
 - Eval : 评估，-v即产出生成过程视频
 ```shell
-python script/sample_images.py --model_path "your model file path" -v
+python scripts/sample_images.py --model_path "your model file path" -v
 ```
 
 - Visualize : eval步骤中的结果
