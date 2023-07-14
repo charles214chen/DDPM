@@ -1,6 +1,14 @@
 ## nanoDiffusion
 > diffusion模型原理学习 & 实践 & 玩具库
 ---
+<p align="center">
+<img src="eval_out/0.gif" width="200%" height="200%" />
+</p>
+
+<p align="center">
+<img src="eval_out/1.gif" width="200%" height="200%" />
+</p>
+
 [TOC]
 ## 目的
 - 用以学习与实践，若你刚接触diffusion并打算开始实践，从这开始是一个好的选择
