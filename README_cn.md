@@ -27,15 +27,6 @@
 bash eval.sh
 ```
 
-**生成过程**
-<p align="center">
-<img src="eval_out/0.gif" width="300%" height="300%" />
-</p>
-
-<p align="center">
-<img src="eval_out/1.gif" width="300%" height="300%" />
-</p>
-
 ### 训练
 极小模型生成手写数字0和1（带条件）；数据集会自动下载
 ```shell

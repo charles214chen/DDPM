@@ -18,7 +18,7 @@
 2. pip install -r requirements.txt
 
 ## Eval
-<u>Pretrained model</u> trained with 20000 iterations. More iterations should be better. Strongly recommend you try it.
+<u>Pretrained model</u> trained with 20000 iterations. Result save in `eval_out` More iterations should be better. Strongly recommend you try it.
 
 ```shell
 bash eval.sh
