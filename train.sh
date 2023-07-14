@@ -1,0 +1,1 @@
+export PYTHONPATH=./ && python scripts/train_tiny_mnist.py

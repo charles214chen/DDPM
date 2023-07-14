@@ -59,9 +59,7 @@ def main(args: argparse.Namespace):
 
 def get_sample_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    model_path = "./checkpoints/nano2/" \
-                 "aigc-ddpm-tiny_mnist_ddpm-2023-04-15-19-16-iteration-2400-model.pth"
-    parser.add_argument("--model_path", type=str, default=model_path)
+    parser.add_argument("--model_path", type=str)
     parser.add_argument("--save_dir", type=str, default="./model_eval")
     parser.add_argument("--num_samples", type=int, default=10)
     parser.add_argument("--vis_process", "-v", action="store_true", default=False)
